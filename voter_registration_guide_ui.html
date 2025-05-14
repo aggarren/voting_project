@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Are you ready to vote?</title>
+  <style>
+    body {
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #ffffff);
+      color: #333;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 1em;
+      text-align: center;
+      color: #00695c;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      padding: 40px;
+      margin-top: 30px;
+      animation: fadeIn 0.5s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      text-align: center;
+    }
+    .card:hover {
+      transform: scale(1.01);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+    .question {
+      font-size: 1.8em;
+      margin-bottom: 30px;
+      color: #004d40;
+    }
+    .choices {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .choices button {
+      background: #00796b;
+      color: #fff;
+      border: none;
+      padding: 18px 30px;
+      margin: 15px 0;
+      font-size: 1.3em;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      width: 80%;
+      max-width: 500px;
+    }
+    .choices button:hover {
+      background: #004d40;
+      transform: scale(1.05);
+    }
+    .result {
+      font-size: 1.5em;
+      color: #2e7d32;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  
+    .restart {
+      bottom: 20px;
+      right: 20px;
+      background: #d32f2f;
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1.2em;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      z-index: 1000;
+    }
+    .restart:hover {
+      background: #b71c1c;
+      transform: scale(1.05);
+    }
+
+</style>
+</head>
+<body>
+
+<h1>Are you ready to vote?</h1>
+<div id="app"></div>
+
+<script>
+const tree = {
+  "start": {
+    "question": "Are you registered to vote?",
+    "choices": {
+      "Yes": "know_registration_address",
+      "No": "check_eligibility",
+      "I Don't Know": "check_eligibility_idk"
+    }
+  },
+  "know_registration_address": {
+    "question": "Do you know the address on your voter registration?",
+    "choices": {
+      "Yes": "more_than_one_address",
+      "No": "more_than_one_address"
+    }
+  },
+  "more_than_one_address": {
+    "question": "Do you have more than one address (e.g. home and campus)?",
+    "choices": {
+      "Yes": "know_preferred_address",
+      "No": "register_current"
+    }
+  },
+  "know_preferred_address": {
+    "question": "Do you know where you want to vote?",
+    "choices": {
+      "Yes": "registration_matches_preference",
+      "No": "interested_in_competitive_elections"
+    }
+  },
+  "registration_matches_preference": {
+    "question": "Does your registration address match where you prefer to vote?",
+    "choices": {
+      "Yes": "ready",
+      "No": "register_current"
+    }
+  },
+  "address_matches_registration": {
+    "question": "Does your current address match your registration address?",
+    "choices": {
+      "Yes": "want_to_vote_there",
+      "No": "register_current"
+    }
+  },
+  "want_to_vote_there": {
+    "question": "Is this the address where you want to vote?",
+    "choices": {
+      "Yes": "ready",
+      "No": "register_current"
+    }
+  },
+  "interested_in_competitive_elections": {
+    "question": "Are you interested in voting in competitive elections?",
+    "choices": {
+      "Yes": "check_competitive_sources",
+      "No": "feel_connected_address"
+    }
+  },
+  "check_competitive_sources": {
+    "question": "Check sites like cookpolitical.com, ballotpedia.org, opensecrets.org. Find any competitive races?",
+    "choices": {
+      "Yes": "register_competitive",
+      "No": "feel_connected_address"
+    }
+  },
+  "feel_connected_address": {
+    "question": "Among your addresses, is there one you feel more connected to?",
+    "choices": {
+      "Yes": "register_connected",
+      "No": "register_any"
+    }
+  },
+  "check_eligibility": {
+    "question": "Are you 18+?",
+    "choices": {
+      "Yes": "are_us_citizen",
+      "No": "not_eligible"
+    }
+  },
+  "are_us_citizen": {
+    "question": "Are you a U.S. citizen?",
+    "choices": {
+      "Yes": "lost_rights",
+      "No": "not_eligible"
+    }
+  },
+  "lost_rights": {
+    "question": "Have you lost your voting rights due to legal action?",
+    "choices": {
+      "Yes": "restored_rights",
+      "No": "ready_to_register"
+    }
+  },
+  "restored_rights": {
+    "question": "Have your rights been restored?",
+    "choices": {
+      "Yes": "ready_to_register",
+      "No": "not_eligible"
+    }
+  },
+  "ready_to_register": {
+    "question": "You are eligible to vote! Would you like to register?",
+    "choices": {
+      "Yes": "more_than_one_address",
+      "No": "democracy_hater"
+    }
+  },
+  "check_eligibility_idk": {
+    "question": "Are you eligible to vote?",
+    "choices": {
+      "Yes": "check_registration_status",
+      "No": "not_eligible"
+    }
+  },
+  "check_registration_status": {
+    "question": "Go to vote.org to check if you're registered. What's the result?",
+    "choices": {
+      "I am registered": "know_registration_address",
+      "I am not registered": "ready_to_register",
+      "It's not clear": "ready_to_register"
+    }
+  },
+  "register_current": {
+    "result": "You should (re)register to vote using your current address. Go to vote.org to get started."
+  },
+  "register_competitive": {
+    "result": "(Re)Register to vote using your valid address in the area with the competitive election(s). Go to vote.org or vote411.org."
+  },
+  "register_connected": {
+    "result": "Choose to register to vote using the address where you feel most connected. Re(register) at vote.org if necessary."
+  },
+  "register_any": {
+    "result": "Use any criteria (e.g. convenience) to choose an address for voting. Register to vote there."
+  },
+  "ready": {
+    "result": "You are ready for voting. You need to decide if you'll vote on Election Day, early, or by mail. Go to vote411.org for info about voting rules in your area."
+  },
+  "democracy_hater": {
+    "question": "When did you start hating democracy?",
+    "choices": {
+      "Recently": "vdem",
+      "Always": "vdem"
+    }
+  },
+  "vdem": {
+    "result": "Read materials at v-dem.net and reconsider your choice not to participate in elections."
+  },
+  "not_eligible": {
+    "result": "Sorry! You're not eligible to vote."
+  }
+};
+
+let currentNode = "start";
+
+function render() {
+  const node = tree[currentNode];
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  if (node.question) {
+    const q = document.createElement('div');
+    q.className = 'question';
+    q.textContent = node.question;
+    card.appendChild(q);
+
+    const choices = document.createElement('div');
+    choices.className = 'choices';
+    for (const [choice, nextNode] of Object.entries(node.choices)) {
+      const btn = document.createElement('button');
+      btn.textContent = choice;
+      btn.onclick = () => {
+        currentNode = nextNode;
+        render();
+      };
+      choices.appendChild(btn);
+    }
+    card.appendChild(choices);
+  } else if (node.result) {
+    const result = document.createElement('div');
+    result.className = 'result';
+    result.innerHTML = node.result.replace(/(https?:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
+    card.appendChild(result);
+  }
+const restartBtn = document.createElement('button');
+restartBtn.textContent = '🔄 Start Over';
+restartBtn.className = 'restart';
+restartBtn.onclick = () => {
+  currentNode = 'start';
+  render();
+};
+card.appendChild(restartBtn);
+
+  app.appendChild(card);
+}
+
+render();
+</script>
+
+</body>
+</html>
