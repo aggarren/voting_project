@@ -98,6 +98,13 @@
 <body>
 
 <h1>Are you ready to vote?</h1>
+
+<p style="font-size: 1.2em; max-width: 800px; margin: 0 auto; text-align: center; color: #555;">
+  This guide is designed to help university students determine if they are legally prepared to vote. 
+  Many university students face challenges in deciding where to register, how to register, and verifying 
+  their voting options. This guide simplifies the process by providing straightforward guidance for preparing to vote.
+</p>
+
 <div id="app"></div>
 
 <script>
@@ -125,7 +132,7 @@ const tree = {
     }
   },
   "know_preferred_address": {
-    "question": "Do you know where you want to vote?",
+    "question": "You can choose which address to use for voting. Just make sure it's a valid address where you receive mail. Do you know which address you want to use for voting?",
     "choices": {
       "Yes": "registration_matches_preference",
       "No": "interested_in_competitive_elections"
@@ -204,15 +211,23 @@ const tree = {
   "ready_to_register": {
     "question": "You are eligible to vote! Would you like to register?",
     "choices": {
-      "Yes": "more_than_one_address",
+      "Yes": "more_than_one_address_not_previously_registered",
       "No": "democracy_hater"
+    }
+  },
+  "more_than_one_address_not_previously_registered": {
+    "question": "Let's get you registered! Do you have more than one address (e.g. home and campus)?",
+    "choices": {
+      "Yes": "know_preferred_address",
+      "No": "register_current"
     }
   },
   "check_eligibility_idk": {
     "question": "Are you eligible to vote?",
     "choices": {
       "Yes": "check_registration_status",
-      "No": "not_eligible"
+      "No": "not_eligible",
+      "I Don't Know": "check_eligibility"
     }
   },
   "check_registration_status": {
@@ -254,6 +269,7 @@ const tree = {
 };
 
 let currentNode = "start";
+const historyStack = []; // Tracks node history
 
 function render() {
   const node = tree[currentNode];
@@ -263,6 +279,30 @@ function render() {
   const card = document.createElement('div');
   card.className = 'card';
 
+  // Progress bar
+  const progress = document.createElement('div');
+  progress.style.marginBottom = "20px";
+  progress.innerHTML = `<div style="height: 10px; background: #ccc; border-radius: 10px; overflow: hidden;">
+    <div style="width: ${Math.min((historyStack.length / 10) * 100, 100)}%; height: 10px; background: #00796b;"></div>
+  </div>
+  <div style="text-align: right; font-size: 0.9em; color: #666;">Step ${historyStack.length + 1}</div>`;
+  card.appendChild(progress);
+
+  // Back button
+  if (historyStack.length > 0) {
+    const backBtn = document.createElement('button');
+    backBtn.textContent = '⬅️ Back';
+    backBtn.className = 'restart';
+    backBtn.style.background = '#555';
+    backBtn.style.marginBottom = '20px';
+    backBtn.onclick = () => {
+      currentNode = historyStack.pop();
+      render();
+      window.scrollTo(0, 0);
+    };
+    card.appendChild(backBtn);
+  }
+
   if (node.question) {
     const q = document.createElement('div');
     q.className = 'question';
@@ -271,12 +311,15 @@ function render() {
 
     const choices = document.createElement('div');
     choices.className = 'choices';
+
     for (const [choice, nextNode] of Object.entries(node.choices)) {
       const btn = document.createElement('button');
       btn.textContent = choice;
       btn.onclick = () => {
+        historyStack.push(currentNode);
         currentNode = nextNode;
         render();
+        window.scrollTo(0, 0);
       };
       choices.appendChild(btn);
     }
@@ -284,23 +327,30 @@ function render() {
   } else if (node.result) {
     const result = document.createElement('div');
     result.className = 'result';
-    result.innerHTML = node.result.replace(/(https?:\/\/\S+)/g, '<a href="$1" target="_blank">$1</a>');
+    const safeHTML = node.result.replace(
+      /(https?:\/\/[^\s<>"'()]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+    result.innerHTML = safeHTML;
     card.appendChild(result);
   }
-const restartBtn = document.createElement('button');
-restartBtn.textContent = '🔄 Start Over';
-restartBtn.className = 'restart';
-restartBtn.onclick = () => {
-  currentNode = 'start';
-  render();
-};
-card.appendChild(restartBtn);
+
+  const restartBtn = document.createElement('button');
+  restartBtn.textContent = '🔄 Start Over';
+  restartBtn.className = 'restart';
+  restartBtn.onclick = () => {
+    currentNode = 'start';
+    historyStack.length = 0;
+    render();
+    window.scrollTo(0, 0);
+  };
+  card.appendChild(restartBtn);
 
   app.appendChild(card);
 }
 
 render();
 </script>
-
+  
 </body>
 </html>
