@@ -327,12 +327,14 @@ function render() {
   } else if (node.result) {
     const result = document.createElement('div');
     result.className = 'result';
-    const safeHTML = node.result.replace(
-      /(https?:\/\/[^\s<>"'()]+)/g,
-      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
-    );
-    result.innerHTML = safeHTML;
-    card.appendChild(result);
+    if (node.result.includes('<a')) {
+  result.innerHTML = node.result; // already formatted HTML
+} else {
+  result.innerHTML = node.result.replace(
+    /(https?:\/\/[^\s<>"'()]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+}
   }
 
   const restartBtn = document.createElement('button');
