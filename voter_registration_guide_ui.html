@@ -272,11 +272,10 @@ let currentNode = "start";
 const historyStack = []; // Tracks node history
 
 function makeLinksClickable(text) {
-  return text.replace(/(https?:\/\/[^\s<>"'()]+)/g, (match) => {
-    const cleanText = match
-      .replace(/^https?:\/\/(www\.)?/, '')  // Remove https:// and www.
-      .replace(/\/$/, '');                  // Remove trailing slash if exists
-    return `<a href="${match}" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+  return text.replace(/((https?:\/\/)?(www\.)[^\s<>"'()]+)/g, (match, p1) => {
+    const url = p1.startsWith('http') ? p1 : 'https://' + p1;
+    const display = p1.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${display}</a>`;
   });
 }
 
