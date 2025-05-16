@@ -272,11 +272,10 @@ let currentNode = "start";
 const historyStack = []; // Tracks node history
 
 function makeLinksClickable(text) {
-  return text.replace(/((https?:\/\/|www\.)[^\s<>"'()]+?)([.,!?)]?)(?=\s|$)/g, (match, url, protocol, punctuation) => {
-    const href = url.startsWith('http') ? url : 'https://' + url;
-    const display = url.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${display}</a>${punctuation || ''}`;
-  });
+  return text.replace(
+    /(https?:\/\/[^\s<>"'()]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
 }
 
   
