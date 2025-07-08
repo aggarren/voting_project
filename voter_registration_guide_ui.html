@@ -118,10 +118,10 @@ const tree = {
     }
   },
   "know_registration_address": {
-    "question": "Do you know the address on your voter registration?",
+    "question": "Are you confident you know the address listed on your voter registration?",
     "choices": {
-      "Yes": "more_than_one_address",
-      "No": "more_than_one_address"
+      "I am confident I know the address on my voter registration": "more_than_one_address",
+      "I am NOT confident about the address on my voter registration": "check_registration_status"
     }
   },
   "more_than_one_address": {
@@ -231,7 +231,7 @@ const tree = {
     }
   },
   "check_registration_status": {
-    "question": "Go to https://vote.org to check if you're registered. What's the result?",
+    "question": "Go to https://vote.org to check if and where you're registered. What's the result?",
     "choices": {
       "I am registered": "know_registration_address",
       "I am not registered": "ready_to_register",
